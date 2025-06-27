@@ -14,7 +14,7 @@ import deluxeRoom from "./assets-compressed/images/rooms/deluxe/IMG_4795.HEIC.jp
 import jrSuiteRoom from "./assets-compressed/images/rooms/jr-suite/IMG_4796.HEIC.jpg";
 import yayaStaff from "./assets-compressed/images/team/yaya-reception-and-operations.jpg";
 import oranChef from "./assets-compressed/images/team/oran-the-chef.jpg";
-import michalCleaning from "./assets-compressed/images/team/michal-the-cleaning-lady.jpg";
+import michalCleaning from "./assets-compressed/images/team/michal-the-sommelier.jpg";
 // Import videos
 import vibeVideo from "./assets-compressed/images/vibe/vibe.mp4";
 import chefVideo from "./assets-compressed/images/vibe/chef-in-action-vert-short-vid.mp4";
@@ -126,9 +126,9 @@ function App() {
     },
     {
       name: 'Michal',
-      position: 'Cleaning Lady',
+      position: 'Sommelier',
       image: michalCleaning,
-      description: 'Maintaining pristine luxury standards in every detail'
+      description: 'Curating exceptional wine pairings to elevate your dining experience'
     }
   ];
 
