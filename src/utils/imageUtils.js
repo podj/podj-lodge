@@ -3,17 +3,36 @@
 // Check if browser supports WebP
 export function supportsWebP() {
   // Return false if not in browser environment
-  if (typeof window === 'undefined') return false;
+  if (typeof window === 'undefined') return Promise.resolve(false);
   
-  // For iOS Safari and other browsers that might have issues with canvas detection
-  // Use a more reliable feature detection approach
-  const webpTest = new Image();
-  webpTest.onerror = () => false;
-  
-  // Create a promise-based check
+  // Create a promise-based check with timeout
   return new Promise((resolve) => {
-    webpTest.onload = () => resolve(webpTest.width === 1);
-    webpTest.onerror = () => resolve(false);
+    const webpTest = new Image();
+    let resolved = false;
+    
+    // Set a timeout to prevent hanging on mobile
+    const timeout = setTimeout(() => {
+      if (!resolved) {
+        resolved = true;
+        resolve(false); // Default to false if detection takes too long
+      }
+    }, 1000); // 1 second timeout
+    
+    webpTest.onload = function() {
+      if (!resolved) {
+        resolved = true;
+        clearTimeout(timeout);
+        resolve(webpTest.width === 1 && webpTest.height === 1);
+      }
+    };
+    
+    webpTest.onerror = function() {
+      if (!resolved) {
+        resolved = true;
+        clearTimeout(timeout);
+        resolve(false);
+      }
+    };
     
     // A 1x1 WebP image
     webpTest.src = 'data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEAAwA0JaQAA3AA/vuUAAA=';

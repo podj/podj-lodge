@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import './App.css';
 import Loader from './components/Loader';
-import { supportsWebP } from './utils/imageUtils';
 
 // Import images - both regular and WebP versions
 // Amenetis
@@ -40,27 +39,19 @@ import michalSommelierWebp from "./assets-compressed/images/team/michal-the-somm
 import vibeVideo from "./assets-compressed/images/vibe/vibe.mp4";
 import chefVideo from "./assets-compressed/images/vibe/chef-in-action-vert-short-vid.mp4";
 
-// Optimized Image component that selects WebP or fallback based on browser support
-function OptimizedImage({ src, webpSrc, alt, ...props }) {
-  const [webpSupported, setWebpSupported] = useState(false);
-  
-  useEffect(() => {
-    async function checkWebP() {
-      try {
-        const isSupported = await supportsWebP();
-        setWebpSupported(isSupported);
-      } catch (error) {
-        setWebpSupported(false);
-      }
-    }
-    
-    checkWebP();
-  }, []);
-  
-  // If webpSupported is false, use the regular src
-  const imageSrc = webpSupported ? webpSrc : src;
-  
-  return <img src={imageSrc} alt={alt} {...props} />;
+
+
+// Optimized Image component using native picture element for better performance
+function OptimizedImage({ src, webpSrc, alt, className, ...props }) {
+  // Use picture element to let browser handle format selection natively
+  // This prevents double loading and is more performant
+  return (
+    <picture>
+      <source srcSet={webpSrc} type="image/webp" />
+      <source srcSet={src} type={src.endsWith('.jpg') || src.endsWith('.jpeg') ? 'image/jpeg' : 'image/png'} />
+      <img src={src} alt={alt} className={className} {...props} />
+    </picture>
+  );
 }
 
 function App() {
@@ -97,10 +88,19 @@ function App() {
     const preloadImage = (src) => {
       return new Promise((resolve) => {
         const img = new Image();
+        // Set a timeout for individual image loading
+        const imgTimeout = setTimeout(() => {
+          console.log(`Image load timeout: ${src}`);
+          resolve();
+        }, 3000); // 3 second timeout per image
+        
         img.onload = () => {
+          clearTimeout(imgTimeout);
           resolve();
         };
         img.onerror = () => {
+          clearTimeout(imgTimeout);
+          console.log(`Image load error: ${src}`);
           resolve();
         };
         img.src = src;
@@ -109,11 +109,26 @@ function App() {
 
     const preloadVideo = (src) => {
       return new Promise((resolve) => {
+        // Skip video preloading on mobile to speed up loading
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (isMobile) {
+          resolve();
+          return;
+        }
+        
         const video = document.createElement('video');
+        const videoTimeout = setTimeout(() => {
+          console.log(`Video load timeout: ${src}`);
+          resolve();
+        }, 5000); // 5 second timeout for videos
+        
         video.oncanplaythrough = () => {
+          clearTimeout(videoTimeout);
           resolve();
         };
         video.onerror = () => {
+          clearTimeout(videoTimeout);
+          console.log(`Video load error: ${src}`);
           resolve();
         };
         video.src = src;
@@ -122,38 +137,39 @@ function App() {
 
     const preloadAssets = async () => {
       try {
-        // Check WebP support first
-        const isWebpSupported = await supportsWebP();
-        
-        // Preload images (either WebP or regular based on support)
-        const imagePromises = imagePairs.map(pair => {
-          return preloadImage(isWebpSupported ? pair.webp : pair.regular);
+        // Preload only critical images (first 3-4 images)
+        // Since we're using picture element, just preload the regular format
+        // The browser will handle WebP loading if supported
+        const criticalImages = imagePairs.slice(0, 4);
+        const imagePromises = criticalImages.map(pair => {
+          return preloadImage(pair.regular);
         });
         
-        // Preload videos
+        // Preload videos only on desktop
         const videoPromises = videos.map(video => preloadVideo(video));
 
-        // Add a minimum loading time of 2 seconds for the luxury effect
-        const minLoadingTime = new Promise(resolve => setTimeout(resolve, 2000));
+        // Add a minimum loading time of 1.5 seconds for the luxury effect (reduced for mobile)
+        const minLoadingTime = new Promise(resolve => setTimeout(resolve, 1500));
         
         await Promise.all([...imagePromises, ...videoPromises, minLoadingTime]);
         setLoading(false);
+        
+        // Preload remaining images in background after loader is gone
+        const remainingImages = imagePairs.slice(4);
+        remainingImages.forEach(pair => {
+          preloadImage(pair.regular);
+        });
       } catch (error) {
         console.error('Error preloading assets:', error);
-        // Fallback to non-WebP images if there's an error
-        const imagePromises = imagePairs.map(pair => preloadImage(pair.regular));
-        const videoPromises = videos.map(video => preloadVideo(video));
-        const minLoadingTime = new Promise(resolve => setTimeout(resolve, 2000));
-        
-        await Promise.all([...imagePromises, ...videoPromises, minLoadingTime]);
         setLoading(false);
       }
     };
 
     // Add a safety timeout to ensure the loader disappears even if there are issues
     const safetyTimeout = setTimeout(() => {
+      console.log('Safety timeout triggered - hiding loader');
       setLoading(false);
-    }, 8000); // 8 seconds maximum loading time
+    }, 5000); // Reduced to 5 seconds for better mobile experience
 
     preloadAssets();
 

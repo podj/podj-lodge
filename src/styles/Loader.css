@@ -107,4 +107,41 @@
   100% {
     opacity: 0.6;
   }
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .loader-logo {
+    font-size: 2rem;
+    letter-spacing: 2px;
+  }
+  
+  .loader-spinner {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .loader-text {
+    font-size: 1rem;
+    letter-spacing: 1px;
+  }
+  
+  .loader-content {
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .loader-logo {
+    font-size: 1.5rem;
+  }
+  
+  .loader-spinner {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .loader-text {
+    font-size: 0.9rem;
+  }
 } 
