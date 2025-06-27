@@ -42,13 +42,22 @@ import chefVideo from "./assets-compressed/images/vibe/chef-in-action-vert-short
 
 // Optimized Image component that selects WebP or fallback based on browser support
 function OptimizedImage({ src, webpSrc, alt, ...props }) {
-  const [webpSupported, setWebpSupported] = useState(null);
+  const [webpSupported, setWebpSupported] = useState(false);
   
   useEffect(() => {
-    setWebpSupported(supportsWebP());
+    async function checkWebP() {
+      try {
+        const isSupported = await supportsWebP();
+        setWebpSupported(isSupported);
+      } catch (error) {
+        setWebpSupported(false);
+      }
+    }
+    
+    checkWebP();
   }, []);
   
-  // If webpSupported is null (not determined yet), use the regular src
+  // If webpSupported is false, use the regular src
   const imageSrc = webpSupported ? webpSrc : src;
   
   return <img src={imageSrc} alt={alt} {...props} />;
@@ -112,24 +121,44 @@ function App() {
     };
 
     const preloadAssets = async () => {
-      const isWebpSupported = supportsWebP();
-      
-      // Preload images (either WebP or regular based on support)
-      const imagePromises = imagePairs.map(pair => {
-        return preloadImage(isWebpSupported ? pair.webp : pair.regular);
-      });
-      
-      // Preload videos
-      const videoPromises = videos.map(video => preloadVideo(video));
+      try {
+        // Check WebP support first
+        const isWebpSupported = await supportsWebP();
+        
+        // Preload images (either WebP or regular based on support)
+        const imagePromises = imagePairs.map(pair => {
+          return preloadImage(isWebpSupported ? pair.webp : pair.regular);
+        });
+        
+        // Preload videos
+        const videoPromises = videos.map(video => preloadVideo(video));
 
-      // Add a minimum loading time of 2 seconds for the luxury effect
-      const minLoadingTime = new Promise(resolve => setTimeout(resolve, 2000));
-      
-      await Promise.all([...imagePromises, ...videoPromises, minLoadingTime]);
-      setLoading(false);
+        // Add a minimum loading time of 2 seconds for the luxury effect
+        const minLoadingTime = new Promise(resolve => setTimeout(resolve, 2000));
+        
+        await Promise.all([...imagePromises, ...videoPromises, minLoadingTime]);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error preloading assets:', error);
+        // Fallback to non-WebP images if there's an error
+        const imagePromises = imagePairs.map(pair => preloadImage(pair.regular));
+        const videoPromises = videos.map(video => preloadVideo(video));
+        const minLoadingTime = new Promise(resolve => setTimeout(resolve, 2000));
+        
+        await Promise.all([...imagePromises, ...videoPromises, minLoadingTime]);
+        setLoading(false);
+      }
     };
 
+    // Add a safety timeout to ensure the loader disappears even if there are issues
+    const safetyTimeout = setTimeout(() => {
+      setLoading(false);
+    }, 8000); // 8 seconds maximum loading time
+
     preloadAssets();
+
+    // Clear the safety timeout if component unmounts
+    return () => clearTimeout(safetyTimeout);
   }, [imagePairs, videos]);
 
   const rooms = [
