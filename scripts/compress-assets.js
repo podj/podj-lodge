@@ -141,35 +141,49 @@ async function compressVideo(filePath) {
     
     const outputPath = path.join(outputDir, path.basename(filePath));
     
-    // Just copy the video file for now since we're having issues with ffmpeg
-    // We'll focus on image optimization which is more critical
-    await fs.copyFile(filePath, outputPath);
-    console.log(`Copied video: ${relativePath}`);
-    return true;
-    
-    /* Commenting out the ffmpeg code due to issues with odd dimensions
     return new Promise((resolve, reject) => {
+      // Use simpler ffmpeg command with proper filter syntax
       execFile(ffmpeg, [
         '-i', filePath,
         '-c:v', 'libx264',
-        '-crf', VIDEO_CRF.toString(),
-        '-preset', VIDEO_PRESET,
+        '-crf', '30', // Higher CRF for more compression
+        '-preset', 'medium',
         '-c:a', 'aac',
-        '-b:a', '128k',
-        // Add resolution scaling for videos, ensuring width is even
-        '-vf', 'scale=\'min(1280,iw)/2*2\':\'min(720,ih)/2*2\':force_original_aspect_ratio=decrease',
+        '-b:a', '96k', // Lower audio bitrate
+        // Use simpler scale filter
+        '-vf', 'scale=720:-2',
+        // Set maximum bitrate
+        '-maxrate', '1M',
+        '-bufsize', '2M',
         outputPath
       ], (error) => {
         if (error) {
           console.error(`Error compressing video ${relativePath}:`, error);
-          reject(error);
+          console.log(`Falling back to copying video: ${relativePath}`);
+          // Fallback to copying if compression fails
+          fs.copyFile(filePath, outputPath)
+            .then(() => {
+              console.log(`Copied video (fallback): ${relativePath}`);
+              resolve();
+            })
+            .catch(err => {
+              console.error(`Error copying video ${relativePath}:`, err);
+              reject(err);
+            });
         } else {
-          console.log(`Compressed video: ${relativePath}`);
-          resolve();
+          // Get file sizes for comparison
+          fs.stat(filePath).then(originalStat => {
+            fs.stat(outputPath).then(compressedStat => {
+              const originalSize = originalStat.size;
+              const compressedSize = compressedStat.size;
+              const reduction = ((originalSize - compressedSize) / originalSize * 100).toFixed(2);
+              console.log(`Compressed video: ${relativePath} (${reduction}% reduction)`);
+              resolve();
+            });
+          });
         }
       });
     });
-    */
   } catch (err) {
     console.error(`Error compressing video ${relativePath}:`, err);
   }
