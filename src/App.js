@@ -395,7 +395,7 @@ function App() {
               <p className="section-subtitle">A gastronomic journey curated by our master chef</p>
               <div className="dining-content">
                 <div className="dining-video">
-                  <video autoPlay muted loop>
+                  <video autoPlay muted loop playsInline preload="auto">
                     <source src={chefVideo} type="video/mp4" />
                   </video>
                 </div>
