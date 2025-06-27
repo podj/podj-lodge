@@ -15,12 +15,13 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "npm run compress && react-scripts build && node scripts/copy-to-build.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "compress": "node scripts/compress-assets.js",
     "update-imports": "node scripts/update-asset-imports.js",
-    "optimize-assets": "npm run compress && npm run update-imports"
+    "optimize-assets": "npm run compress && npm run update-imports",
+    "copy-assets": "node scripts/copy-to-build.js"
   },
   "eslintConfig": {
     "extends": [
@@ -42,6 +43,7 @@
   },
   "devDependencies": {
     "ffmpeg-static": "^5.2.0",
+    "fs-extra": "^11.2.0",
     "imagemin": "^9.0.1",
     "imagemin-mozjpeg": "^10.0.0",
     "imagemin-pngquant": "^10.0.0",

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import './App.css';
 import Loader from './components/Loader';
+import { getOptimizedImagePath } from './utils/imageUtils';
 
 // Import images
 import firstBalcony from "./assets-compressed/images/amenetis/first_balcony.jpg";
@@ -222,7 +223,7 @@ function App() {
                 {rooms.map((room) => (
                   <div key={room.id} className="room-card" onClick={() => setSelectedRoom(room)}>
                     <div className="room-image">
-                      <img src={room.image} alt={room.name} />
+                      <img src={getOptimizedImagePath(room.image)} alt={room.name} />
                       <div className="room-overlay">
                         <span className="room-price">{room.price}/night</span>
                       </div>
@@ -249,21 +250,21 @@ function App() {
               <p className="section-subtitle">Indulge in our world-class facilities</p>
               <div className="amenities-grid">
                 <div className="amenity-card">
-                  <img src={firstBalcony} alt="Private Balcony" />
+                  <img src={getOptimizedImagePath(firstBalcony)} alt="Private Balcony" />
                   <div className="amenity-content">
                     <h3>Private Balconies</h3>
                     <p>Breathtaking views from your personal sanctuary</p>
                   </div>
                 </div>
                 <div className="amenity-card">
-                  <img src={secondBalcony} alt="Luxury Terrace" />
+                  <img src={getOptimizedImagePath(secondBalcony)} alt="Luxury Terrace" />
                   <div className="amenity-content">
                     <h3>Luxury Terraces</h3>
                     <p>Expansive outdoor spaces for ultimate relaxation</p>
                   </div>
                 </div>
                 <div className="amenity-card">
-                  <img src={secondBalcony02} alt="Scenic Views" />
+                  <img src={getOptimizedImagePath(secondBalcony02)} alt="Scenic Views" />
                   <div className="amenity-content">
                     <h3>Panoramic Views</h3>
                     <p>Unobstructed vistas that inspire and rejuvenate</p>
@@ -286,21 +287,21 @@ function App() {
                 </div>
                 <div className="dining-grid">
                   <div className="dining-card">
-                    <img src={food} alt="Gourmet Cuisine" />
+                    <img src={getOptimizedImagePath(food)} alt="Gourmet Cuisine" />
                     <div className="dining-card-content">
                       <h3>Gourmet Cuisine</h3>
                       <p>Fresh, locally-sourced ingredients crafted into culinary masterpieces</p>
                     </div>
                   </div>
                   <div className="dining-card">
-                    <img src={dinningTable} alt="Elegant Dining" />
+                    <img src={getOptimizedImagePath(dinningTable)} alt="Elegant Dining" />
                     <div className="dining-card-content">
                       <h3>Elegant Dining</h3>
                       <p>Sophisticated ambiance for unforgettable dining experiences</p>
                     </div>
                   </div>
                   <div className="dining-card">
-                    <img src={deserts} alt="Artisan Desserts" />
+                    <img src={getOptimizedImagePath(deserts)} alt="Artisan Desserts" />
                     <div className="dining-card-content">
                       <h3>Artisan Desserts</h3>
                       <p>Exquisite sweet creations to complete your culinary journey</p>
@@ -320,7 +321,7 @@ function App() {
                 {teamMembers.map((member, index) => (
                   <div key={index} className="team-card">
                     <div className="team-image">
-                      <img src={member.image} alt={member.name} />
+                      <img src={getOptimizedImagePath(member.image)} alt={member.name} />
                     </div>
                     <div className="team-content">
                       <h3 className="team-name">{member.name}</h3>
@@ -447,7 +448,7 @@ function App() {
             <div className="modal-overlay" onClick={() => setSelectedRoom(null)}>
               <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <button className="modal-close" onClick={() => setSelectedRoom(null)}>×</button>
-                <img src={selectedRoom.image} alt={selectedRoom.name} />
+                <img src={getOptimizedImagePath(selectedRoom.image)} alt={selectedRoom.name} />
                 <div className="modal-info">
                   <h3>{selectedRoom.name}</h3>
                   <p className="modal-price">{selectedRoom.price}/night</p>
