@@ -70,6 +70,9 @@ async function compressImage(filePath) {
     // Prepare sharp instance with resizing if needed
     let sharpInstance = sharp(filePath);
     
+    // Preserve EXIF orientation metadata
+    sharpInstance = sharpInstance.rotate();
+    
     // Resize only if image is larger than max dimensions
     if (metadata.width > MAX_IMAGE_WIDTH || metadata.height > MAX_IMAGE_HEIGHT) {
       sharpInstance = sharpInstance.resize({

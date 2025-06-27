@@ -15,24 +15,12 @@ export function supportsWebP() {
 
 // Get appropriate image path based on browser support
 export function getOptimizedImagePath(path) {
-  // If no path or not a string, return as is
-  if (!path || typeof path !== 'string') return path;
-  
-  // Don't try to convert paths that are already processed by webpack (contain hash)
-  if (path.includes('static/media/') || path.includes('.webp')) {
-    return path;
-  }
+  if (!path) return path;
   
   // Only convert jpg/jpeg/png to webp
   if (!/\.(jpe?g|png)$/i.test(path)) return path;
   
-  // For production builds, we need to handle paths differently
-  // since webpack processes the imports
-  if (process.env.NODE_ENV === 'production') {
-    return path; // In production, let webpack handle it
-  }
-  
-  // For development, use the WebP version if supported
+  // If browser supports WebP, use it
   if (supportsWebP()) {
     return path.replace(/\.(jpe?g|png)$/i, '.webp');
   }
