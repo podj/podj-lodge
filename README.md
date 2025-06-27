@@ -68,3 +68,31 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+## Asset Optimization
+
+This project includes tools for optimizing images and videos to improve performance and loading times.
+
+### `npm run optimize-assets`
+
+Runs the complete asset optimization process:
+1. Compresses all images and videos in the `src/assets` directory
+2. Creates WebP versions of all images for modern browsers
+3. Places optimized assets in `src/assets-compressed`
+4. Updates import statements in your code to use the compressed assets
+
+### `npm run compress`
+
+Only compresses the assets without updating imports.
+
+### `npm run update-imports`
+
+Only updates the import statements to use compressed assets.
+
+### Optimization Details
+
+- Images are preserved in their original format and orientation
+- Videos are compressed using H.264 codec with a CRF of 28 (configurable in `scripts/compress-assets.js`)
+- The compression script maintains the original directory structure
+
+After running optimization, the original assets are preserved in `src/assets` while compressed versions are in `src/assets-compressed`.

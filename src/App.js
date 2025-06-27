@@ -3,21 +3,21 @@ import './App.css';
 import Loader from './components/Loader';
 
 // Import images
-import firstBalcony from './assets/images/amenetis/first_balcony.jpg';
-import secondBalcony from './assets/images/amenetis/second_balcony.jpg';
-import secondBalcony02 from './assets/images/amenetis/second_balcony_02.jpg';
-import deserts from './assets/images/dinning-room/deserts.jpg';
-import dinningTable from './assets/images/dinning-room/dinning-table.jpeg';
-import food from './assets/images/dinning-room/food.jpeg';
-import comfortRoom from './assets/images/rooms/comfort/IMG_4794.HEIC.jpg';
-import deluxeRoom from './assets/images/rooms/deluxe/IMG_4795.HEIC.jpg';
-import jrSuiteRoom from './assets/images/rooms/jr-suite/IMG_4796.HEIC.jpg';
-import yayaStaff from './assets/images/team/yaya-reception-and-operations.jpg';
-import oranChef from './assets/images/team/oran-the-chef.jpg';
-import michalCleaning from './assets/images/team/michal-the-cleaning-lady.jpg';
+import firstBalcony from "./assets-compressed/images/amenetis/first_balcony.jpg";
+import secondBalcony from "./assets-compressed/images/amenetis/second_balcony.jpg";
+import secondBalcony02 from "./assets-compressed/images/amenetis/second_balcony_02.jpg";
+import deserts from "./assets-compressed/images/dinning-room/deserts.jpg";
+import dinningTable from "./assets-compressed/images/dinning-room/dinning-table.jpeg";
+import food from "./assets-compressed/images/dinning-room/food.jpeg";
+import comfortRoom from "./assets-compressed/images/rooms/comfort/IMG_4794.HEIC.jpg";
+import deluxeRoom from "./assets-compressed/images/rooms/deluxe/IMG_4795.HEIC.jpg";
+import jrSuiteRoom from "./assets-compressed/images/rooms/jr-suite/IMG_4796.HEIC.jpg";
+import yayaStaff from "./assets-compressed/images/team/yaya-reception-and-operations.jpg";
+import oranChef from "./assets-compressed/images/team/oran-the-chef.jpg";
+import michalCleaning from "./assets-compressed/images/team/michal-the-cleaning-lady.jpg";
 // Import videos
-import vibeVideo from './assets/images/vibe/vibe.mp4';
-import chefVideo from './assets/images/vibe/chef-in-action-vert-short-vid.mp4';
+import vibeVideo from "./assets-compressed/images/vibe/vibe.mp4";
+import chefVideo from "./assets-compressed/images/vibe/chef-in-action-vert-short-vid.mp4";
 
 function App() {
   const [currentSection, setCurrentSection] = useState('hero');
