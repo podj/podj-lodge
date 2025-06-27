@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import './App.css';
 import Loader from './components/Loader';
 
@@ -30,27 +30,22 @@ function App() {
     roomType: 'deluxe'
   });
 
-  // All assets to preload
-  const assetsToLoad = [
+  // All assets to preload using useMemo to avoid recreating the array on each render
+  const assetsToLoad = useMemo(() => [
     firstBalcony, secondBalcony, secondBalcony02, deserts, dinningTable, food,
     comfortRoom, deluxeRoom, jrSuiteRoom, yayaStaff, oranChef, michalCleaning,
     vibeVideo, chefVideo
-  ];
+  ], []);
 
   // Preload assets
   useEffect(() => {
-    let loadedCount = 0;
-    const totalAssets = assetsToLoad.length;
-    
     const preloadImage = (src) => {
       return new Promise((resolve) => {
         const img = new Image();
         img.onload = () => {
-          loadedCount++;
           resolve();
         };
         img.onerror = () => {
-          loadedCount++;
           resolve();
         };
         img.src = src;
@@ -61,11 +56,9 @@ function App() {
       return new Promise((resolve) => {
         const video = document.createElement('video');
         video.oncanplaythrough = () => {
-          loadedCount++;
           resolve();
         };
         video.onerror = () => {
-          loadedCount++;
           resolve();
         };
         video.src = src;
@@ -74,7 +67,7 @@ function App() {
 
     const preloadAssets = async () => {
       const promises = assetsToLoad.map(asset => {
-        if (asset.endsWith('.mp4')) {
+        if (typeof asset === 'string' && asset.endsWith('.mp4')) {
           return preloadVideo(asset);
         } else {
           return preloadImage(asset);
@@ -89,7 +82,7 @@ function App() {
     };
 
     preloadAssets();
-  }, []);
+  }, [assetsToLoad]);
 
   const rooms = [
     {
