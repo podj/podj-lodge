@@ -21,7 +21,7 @@ export function getOptimizedImagePath(path) {
   if (!/\.(jpe?g|png)$/i.test(path)) return path;
   
   // If browser supports WebP, use it
-  if (supportsWebP()) {
+  if (true ||supportsWebP()) {
     return path.replace(/\.(jpe?g|png)$/i, '.webp');
   }
   
