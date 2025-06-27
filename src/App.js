@@ -14,6 +14,10 @@ import jrSuiteRoom from './assets/images/rooms/jr-suite/IMG_4796.HEIC.jpg';
 import yayaStaff from './assets/images/team/yaya-reception-and-operations.jpg';
 import oranChef from './assets/images/team/oran-the-chef.jpg';
 import michalCleaning from './assets/images/team/michal-the-cleaning-lady.jpg';
+// Import videos
+import vibeVideo from './assets/images/vibe/vibe.mp4';
+import chefVideo from './assets/images/vibe/chef-in-action-vert-short-vid.mp4';
+
 function App() {
   const [currentSection, setCurrentSection] = useState('hero');
   const [selectedRoom, setSelectedRoom] = useState(null);
@@ -134,7 +138,7 @@ function App() {
       <section id="hero" className="hero">
         <div className="hero-video">
           <video autoPlay muted loop playsInline preload="auto">
-            <source src="/vibe.mp4" type="video/mp4" />
+            <source src={vibeVideo} type="video/mp4" />
             Your browser does not support the video tag.
           </video>
           <div className="hero-overlay"></div>
@@ -217,7 +221,7 @@ function App() {
           <div className="dining-content">
             <div className="dining-video">
               <video autoPlay muted loop>
-                <source src="/chef-in-action-vert-short-vid.mp4" type="video/mp4" />
+                <source src={chefVideo} type="video/mp4" />
               </video>
             </div>
             <div className="dining-grid">
