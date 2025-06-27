@@ -15,7 +15,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "npm run compress && react-scripts build && node scripts/copy-to-build.js",
+    "build": "npm run compress && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "compress": "node scripts/compress-assets.js",

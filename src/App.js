@@ -1,24 +1,58 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import './App.css';
 import Loader from './components/Loader';
-import { getOptimizedImagePath } from './utils/imageUtils';
+import { supportsWebP } from './utils/imageUtils';
 
-// Import images
+// Import images - both regular and WebP versions
+// Amenetis
 import firstBalcony from "./assets-compressed/images/amenetis/first_balcony.jpg";
+import firstBalconyWebp from "./assets-compressed/images/amenetis/first_balcony.webp";
 import secondBalcony from "./assets-compressed/images/amenetis/second_balcony.jpg";
+import secondBalconyWebp from "./assets-compressed/images/amenetis/second_balcony.webp";
 import secondBalcony02 from "./assets-compressed/images/amenetis/second_balcony_02.jpg";
+import secondBalcony02Webp from "./assets-compressed/images/amenetis/second_balcony_02.webp";
+
+// Dining
 import deserts from "./assets-compressed/images/dinning-room/deserts.jpg";
+import desertsWebp from "./assets-compressed/images/dinning-room/deserts.webp";
 import dinningTable from "./assets-compressed/images/dinning-room/dinning-table.jpeg";
+import dinningTableWebp from "./assets-compressed/images/dinning-room/dinning-table.webp";
 import food from "./assets-compressed/images/dinning-room/food.jpeg";
+import foodWebp from "./assets-compressed/images/dinning-room/food.webp";
+
+// Rooms
 import comfortRoom from "./assets-compressed/images/rooms/comfort/IMG_4794.HEIC.jpg";
+import comfortRoomWebp from "./assets-compressed/images/rooms/comfort/IMG_4794.HEIC.webp";
 import deluxeRoom from "./assets-compressed/images/rooms/deluxe/IMG_4795.HEIC.jpg";
+import deluxeRoomWebp from "./assets-compressed/images/rooms/deluxe/IMG_4795.HEIC.webp";
 import jrSuiteRoom from "./assets-compressed/images/rooms/jr-suite/IMG_4796.HEIC.jpg";
+import jrSuiteRoomWebp from "./assets-compressed/images/rooms/jr-suite/IMG_4796.HEIC.webp";
+
+// Team
 import yayaStaff from "./assets-compressed/images/team/yaya-reception-and-operations.jpg";
+import yayaStaffWebp from "./assets-compressed/images/team/yaya-reception-and-operations.webp";
 import oranChef from "./assets-compressed/images/team/oran-the-chef.jpg";
-import michalCleaning from "./assets-compressed/images/team/michal-the-sommelier.jpg";
+import oranChefWebp from "./assets-compressed/images/team/oran-the-chef.webp";
+import michalSommelier from "./assets-compressed/images/team/michal-the-sommelier.jpg";
+import michalSommelierWebp from "./assets-compressed/images/team/michal-the-sommelier.webp";
+
 // Import videos
 import vibeVideo from "./assets-compressed/images/vibe/vibe.mp4";
 import chefVideo from "./assets-compressed/images/vibe/chef-in-action-vert-short-vid.mp4";
+
+// Optimized Image component that selects WebP or fallback based on browser support
+function OptimizedImage({ src, webpSrc, alt, ...props }) {
+  const [webpSupported, setWebpSupported] = useState(null);
+  
+  useEffect(() => {
+    setWebpSupported(supportsWebP());
+  }, []);
+  
+  // If webpSupported is null (not determined yet), use the regular src
+  const imageSrc = webpSupported ? webpSrc : src;
+  
+  return <img src={imageSrc} alt={alt} {...props} />;
+}
 
 function App() {
   const [currentSection, setCurrentSection] = useState('hero');
@@ -31,12 +65,23 @@ function App() {
     roomType: 'deluxe'
   });
 
-  // All assets to preload using useMemo to avoid recreating the array on each render
-  const assetsToLoad = useMemo(() => [
-    firstBalcony, secondBalcony, secondBalcony02, deserts, dinningTable, food,
-    comfortRoom, deluxeRoom, jrSuiteRoom, yayaStaff, oranChef, michalCleaning,
-    vibeVideo, chefVideo
+  // Create image pairs for preloading
+  const imagePairs = useMemo(() => [
+    { regular: firstBalcony, webp: firstBalconyWebp },
+    { regular: secondBalcony, webp: secondBalconyWebp },
+    { regular: secondBalcony02, webp: secondBalcony02Webp },
+    { regular: deserts, webp: desertsWebp },
+    { regular: dinningTable, webp: dinningTableWebp },
+    { regular: food, webp: foodWebp },
+    { regular: comfortRoom, webp: comfortRoomWebp },
+    { regular: deluxeRoom, webp: deluxeRoomWebp },
+    { regular: jrSuiteRoom, webp: jrSuiteRoomWebp },
+    { regular: yayaStaff, webp: yayaStaffWebp },
+    { regular: oranChef, webp: oranChefWebp },
+    { regular: michalSommelier, webp: michalSommelierWebp },
   ], []);
+
+  const videos = useMemo(() => [vibeVideo, chefVideo], []);
 
   // Preload assets
   useEffect(() => {
@@ -67,29 +112,32 @@ function App() {
     };
 
     const preloadAssets = async () => {
-      const promises = assetsToLoad.map(asset => {
-        if (typeof asset === 'string' && asset.endsWith('.mp4')) {
-          return preloadVideo(asset);
-        } else {
-          return preloadImage(asset);
-        }
+      const isWebpSupported = supportsWebP();
+      
+      // Preload images (either WebP or regular based on support)
+      const imagePromises = imagePairs.map(pair => {
+        return preloadImage(isWebpSupported ? pair.webp : pair.regular);
       });
+      
+      // Preload videos
+      const videoPromises = videos.map(video => preloadVideo(video));
 
       // Add a minimum loading time of 2 seconds for the luxury effect
       const minLoadingTime = new Promise(resolve => setTimeout(resolve, 2000));
       
-      await Promise.all([...promises, minLoadingTime]);
+      await Promise.all([...imagePromises, ...videoPromises, minLoadingTime]);
       setLoading(false);
     };
 
     preloadAssets();
-  }, [assetsToLoad]);
+  }, [imagePairs, videos]);
 
   const rooms = [
     {
       id: 'comfort',
       name: 'Comfort Room',
       image: comfortRoom,
+      imageWebp: comfortRoomWebp,
       price: '$299',
       description: 'Elegant comfort with premium amenities',
       features: ['King Size Bed', 'City View', 'Marble Bathroom', 'Premium Linens']
@@ -98,6 +146,7 @@ function App() {
       id: 'deluxe',
       name: 'Deluxe Room',
       image: deluxeRoom,
+      imageWebp: deluxeRoomWebp,
       price: '$499',
       description: 'Sophisticated luxury with stunning views',
       features: ['Ocean View', 'Spacious Layout', 'Private Balcony', 'Butler Service']
@@ -106,6 +155,7 @@ function App() {
       id: 'jr-suite',
       name: 'Junior Suite',
       image: jrSuiteRoom,
+      imageWebp: jrSuiteRoomWebp,
       price: '$799',
       description: 'Ultimate luxury experience',
       features: ['Panoramic Views', 'Separate Living Area', 'Premium Balcony', 'Concierge Service']
@@ -117,18 +167,21 @@ function App() {
       name: 'Yaya',
       position: 'Reception & Operations',
       image: yayaStaff,
+      imageWebp: yayaStaffWebp,
       description: 'Ensuring your perfect stay from arrival to departure'
     },
     {
       name: 'Oran',
       position: 'Chef',
       image: oranChef,
+      imageWebp: oranChefWebp,
       description: 'Crafting culinary masterpieces with passion and precision'
     },
     {
       name: 'Michal',
       position: 'Sommelier',
-      image: michalCleaning,
+      image: michalSommelier,
+      imageWebp: michalSommelierWebp,
       description: 'Curating exceptional wine pairings to elevate your dining experience'
     }
   ];
@@ -223,7 +276,11 @@ function App() {
                 {rooms.map((room) => (
                   <div key={room.id} className="room-card" onClick={() => setSelectedRoom(room)}>
                     <div className="room-image">
-                      <img src={getOptimizedImagePath(room.image)} alt={room.name} />
+                      <OptimizedImage 
+                        src={room.image} 
+                        webpSrc={room.imageWebp} 
+                        alt={room.name} 
+                      />
                       <div className="room-overlay">
                         <span className="room-price">{room.price}/night</span>
                       </div>
@@ -250,21 +307,33 @@ function App() {
               <p className="section-subtitle">Indulge in our world-class facilities</p>
               <div className="amenities-grid">
                 <div className="amenity-card">
-                  <img src={getOptimizedImagePath(firstBalcony)} alt="Private Balcony" />
+                  <OptimizedImage 
+                    src={firstBalcony} 
+                    webpSrc={firstBalconyWebp} 
+                    alt="Private Balcony" 
+                  />
                   <div className="amenity-content">
                     <h3>Private Balconies</h3>
                     <p>Breathtaking views from your personal sanctuary</p>
                   </div>
                 </div>
                 <div className="amenity-card">
-                  <img src={getOptimizedImagePath(secondBalcony)} alt="Luxury Terrace" />
+                  <OptimizedImage 
+                    src={secondBalcony} 
+                    webpSrc={secondBalconyWebp} 
+                    alt="Luxury Terrace" 
+                  />
                   <div className="amenity-content">
                     <h3>Luxury Terraces</h3>
                     <p>Expansive outdoor spaces for ultimate relaxation</p>
                   </div>
                 </div>
                 <div className="amenity-card">
-                  <img src={getOptimizedImagePath(secondBalcony02)} alt="Scenic Views" />
+                  <OptimizedImage 
+                    src={secondBalcony02} 
+                    webpSrc={secondBalcony02Webp} 
+                    alt="Scenic Views" 
+                  />
                   <div className="amenity-content">
                     <h3>Panoramic Views</h3>
                     <p>Unobstructed vistas that inspire and rejuvenate</p>
@@ -287,21 +356,33 @@ function App() {
                 </div>
                 <div className="dining-grid">
                   <div className="dining-card">
-                    <img src={getOptimizedImagePath(food)} alt="Gourmet Cuisine" />
+                    <OptimizedImage 
+                      src={food} 
+                      webpSrc={foodWebp} 
+                      alt="Gourmet Cuisine" 
+                    />
                     <div className="dining-card-content">
                       <h3>Gourmet Cuisine</h3>
                       <p>Fresh, locally-sourced ingredients crafted into culinary masterpieces</p>
                     </div>
                   </div>
                   <div className="dining-card">
-                    <img src={getOptimizedImagePath(dinningTable)} alt="Elegant Dining" />
+                    <OptimizedImage 
+                      src={dinningTable} 
+                      webpSrc={dinningTableWebp} 
+                      alt="Elegant Dining" 
+                    />
                     <div className="dining-card-content">
                       <h3>Elegant Dining</h3>
                       <p>Sophisticated ambiance for unforgettable dining experiences</p>
                     </div>
                   </div>
                   <div className="dining-card">
-                    <img src={getOptimizedImagePath(deserts)} alt="Artisan Desserts" />
+                    <OptimizedImage 
+                      src={deserts} 
+                      webpSrc={desertsWebp} 
+                      alt="Artisan Desserts" 
+                    />
                     <div className="dining-card-content">
                       <h3>Artisan Desserts</h3>
                       <p>Exquisite sweet creations to complete your culinary journey</p>
@@ -321,7 +402,11 @@ function App() {
                 {teamMembers.map((member, index) => (
                   <div key={index} className="team-card">
                     <div className="team-image">
-                      <img src={getOptimizedImagePath(member.image)} alt={member.name} />
+                      <OptimizedImage 
+                        src={member.image} 
+                        webpSrc={member.imageWebp} 
+                        alt={member.name} 
+                      />
                     </div>
                     <div className="team-content">
                       <h3 className="team-name">{member.name}</h3>
@@ -448,7 +533,11 @@ function App() {
             <div className="modal-overlay" onClick={() => setSelectedRoom(null)}>
               <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <button className="modal-close" onClick={() => setSelectedRoom(null)}>×</button>
-                <img src={getOptimizedImagePath(selectedRoom.image)} alt={selectedRoom.name} />
+                <OptimizedImage 
+                  src={selectedRoom.image} 
+                  webpSrc={selectedRoom.imageWebp} 
+                  alt={selectedRoom.name} 
+                />
                 <div className="modal-info">
                   <h3>{selectedRoom.name}</h3>
                   <p className="modal-price">{selectedRoom.price}/night</p>
